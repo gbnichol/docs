@@ -19,6 +19,35 @@ When you have made changes to `rancher-cluster.yml`, you will have to run `rke r
 
 Something is wrong in the addons definitions, you can run the following command to get the root cause in the logging of the job:
 
+Sorry, I couldn't figure out any other way to sumit this fix. Please do not commit my change verbatim.
+I deployed a 3 node Rancher 2.3 cluster and ran into this issue.
+Rancher 2.3 implements Kubernetes 1.6. Kubernets 1.6 depricates several APIs.
+https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/
+I used the documented RKE template. This template includes a depricated API.
+https://raw.githubusercontent.com/rancher/rancher/master/rke-templates/3-node-certificate.yml
+Update the file:
+From:
+  ---
+  kind: Deployment
+  apiVersion: extensions/v1beta1
+  metadata:
+    namespace: cattle-system
+    name: cattle
+  spec:
+    replicas: 1
+To:
+ ---
+  kind: Deployment
+  apiVersion: apps/v1
+  metadata:
+    namespace: cattle-system
+    name: cattle
+  spec:
+    selector:
+      matchLabels:
+        component: cattle
+    replicas: 1
+
 ```
 kubectl --kubeconfig kube_config_rancher-cluster.yml logs -l job-name=rke-user-addon-deploy-job -n kube-system
 ```
